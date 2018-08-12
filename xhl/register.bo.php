@@ -5,6 +5,10 @@ require_once 'db.php';
 require_once 'lang.php';
 require_once 'config.php';
 
+require_once "class.phpmailer.php";//获取一个外部文件的内容
+require_once "class.smtp.php";
+
+
 function setupPageLayout($req_method, &$pageLayout)
 {
     $pageLayout['showRegFormOrNot'] = 'container';
@@ -90,7 +94,7 @@ function isInvalidRegister($postArr, &$pageLayout) {
 }
 
 function doRegister($postArr, &$pageLayout)
-{
+{    //顺便完成邮箱注册的功能
     file_put_contents('debug.log', "last input   ".json_encode($pageLayout)."\n",FILE_APPEND);
 
     // 数据校验
@@ -121,7 +125,12 @@ function doRegister($postArr, &$pageLayout)
             setupPageLayout('GET', $pageLayout);
             $pageLayout['has-warning'] = true;
             $pageLayout['retMsg'] = Prompt::$msg['register_failed'];
+          }else{    //如果注册成功 下一步就可以直接发送邮件
+            $token = hash('sha256',$userName.$hashedPassword);                //创建用于激活识别码
+            sendEmail($userName,$token,$emailName);
           }
+
+
       } else {
           // 如果注册失败，则设置相应的错误提示信息，否则，默认只显示注册成功消息和对应的DIV片段代码
           setupPageLayout('GET', $pageLayout);
@@ -138,3 +147,57 @@ function doRegister($postArr, &$pageLayout)
     //file_put_contents('debug.log', "last input   ".json_encode($pageLayout)."\n",FILE_APPEND);
 
 }
+
+function sendEmail($username,$token,$email)
+{
+
+    file_put_contents('debug.log', "test token".$token."\n", FILE_APPEND);
+    $mail=new PHPMailer();
+    $mail->SMTPDebug = 2;              //设置调试信息  如果设置为1或者2 发送不成功会输出报错信息
+//    $body = "<div><form name='form'  action ='active.php' method ='post'>亲爱的".$username."：<br/>感谢您在我站注册了新帐号。<br/>请点击链接激活您的帐号。<br/>
+//
+//
+//    <a href='http://192.168.29.122:8080/active.php?verify=".$token."&name=".$username."' target ='_blank'>请点击链接</a><br/>
+//    </form></div>";
+    $mail->MsgHTML($body);
+
+
+   $mail->Body = "<form name='form'   method ='POST' action ='active.php'>亲爱的".$username."：<br/>感谢您在我站注册了新帐号。<br/>请点击链接激活您的帐号。<br/>
+    
+    <a href='http://192.168.29.122:8080/active.php?verify=".$token."&name=".$username."' target ='_blank'>请点击链接</a><br/>
+    </form>";
+
+
+
+
+//设置smtp参数
+    $mail->IsSMTP();
+    $mail->SMTPAuth=true;
+    $mail->SMTPKeepAlive=true;
+    $mail->SMTPSecure= "ssl";
+//$mail->SMTPSecure= "tls";
+    $mail->Host="smtp.qq.com";
+    $mail->Port=465;
+//$mail->Port=587;
+
+//填写email账号和密码
+
+    $mail->Username="2939906971@qq.com";  //设置发送方
+    $mail->Password="ddibwmugnrttdhcj";   //注意这里也要填写授权码就是我在上面QQ邮箱开启SMTP中提到的，不能填邮箱登录的密码哦。
+    $mail->From="2939906971@qq.com";      //设置发送方
+    $mail->FromName="中传放心传";
+    $mail->Subject="中传***发来的一封邮件";
+    $mail->AltBody=$body;
+    $mail->WordWrap=50;                  // 设置自动换行
+
+    $mail->AddReplyTo("2939906971@qq.com","中传***");//设置回复地址
+    $mail->AddAddress($email,"hello");  //设置邮件接收方的邮箱和姓名
+    $mail->IsHTML(true);                //使用HTML格式发送邮件
+    if(!$mail->Send()){//通过Send方法发送邮件,根据发送结果做相应处理
+        echo "Mailer Error:".$mail->ErrorInfo;
+    }else{
+        echo "Message has been sent"; }
+
+
+}
+
