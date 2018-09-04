@@ -38,7 +38,7 @@ setupPageLayout2($_SERVER['REQUEST_METHOD'], $pageLayout);
   }
   if($_SERVER['REQUEST_METHOD'] ==='GET'){
      // echo 'get';
-      if(isvalidReset($_GET['verify'],$_GET['name'])){
+      if(isvalidReset($_GET['verify'],urldecode($_GET['name']))){
 
       }else{
           setupPageLayout3($pageLayout);
@@ -153,7 +153,7 @@ setupPageLayout2($_SERVER['REQUEST_METHOD'], $pageLayout);
 
                     </script>
                     <input type="text" class="hidden"  name="verify"   value="<?= $_GET['verify'] ?>">
-                    <input type="text" class="hidden"  name="username"   value="<?= $_GET['name'] ?>">
+                    <input type="text" class="hidden"  name="username"   value="<?= urldecode($_GET['name'])?>">
                 </div>
 
 
