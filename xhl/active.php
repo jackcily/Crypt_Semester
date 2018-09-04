@@ -22,6 +22,13 @@ require_once 'active.bo.php';
 // 根据客户端请求类型是GET还是POST，分别设置页面中不同div是否可见
 //setupPageLayout($_SERVER['REQUEST_METHOD'], $pageLayout);
 
+$namep = urldecode($_GET['name']);
+$verifyp = urldecode($_GET['verify']);
+
+
+
+//var_dump($_GET['name']);
+//var_dump(iconv("gbk","utf-8", $_GET['name'] ));
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     doRegisterActive($_POST, $pageLayout);
     //echo $_POST['userName'];
@@ -37,8 +44,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <div class="form-group">
             <div >
-                <input type="text" class="hidden"  name="userName"   value="<?= $_GET['name'] ?>">  <!-- 使用input设置表单中 userName 的数值为 url链接中的 name -->
-                <input type="text" class="hidden"  name="verify"   value="<?= $_GET['verify'] ?>">  <!-- 同上 -->
+                <input type="text" class="hidden"  name="userName"   value="<?= $namep?>">  <!-- 使用input设置表单中 userName 的数值为 url链接中的 name -->
+                <input type="text" class="hidden"  name="verify"   value="<?= $verifyp ?>">  <!-- 同上 -->
             </div>
         </div>
 
